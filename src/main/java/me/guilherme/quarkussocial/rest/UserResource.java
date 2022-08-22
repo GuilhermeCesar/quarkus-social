@@ -1,5 +1,6 @@
 package me.guilherme.quarkussocial.rest;
 
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import me.guilherme.quarkussocial.domain.User;
 import me.guilherme.quarkussocial.rest.dto.CreateUserRequest;
 
@@ -28,7 +29,8 @@ public class UserResource {
     }
 
     @GET
-    public Response listAllUsers(){
-        return Response.ok().build();
+    public Response listAllUsers() {
+        PanacheQuery<User> query = User.findAll();
+        return Response.ok(query.list()).build();
     }
 }
