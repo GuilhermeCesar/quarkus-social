@@ -33,4 +33,35 @@ public class UserResource {
         PanacheQuery<User> query = User.findAll();
         return Response.ok(query.list()).build();
     }
+
+
+    @Transactional
+    @DELETE
+    @Path("/{id}")
+    public Response deleteUser(@PathParam("id") Long id) {
+        User user = User.findById(id);
+
+        if (user != null) {
+            user.delete();
+            return Response.ok()
+                    .build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
+
+    }
+
+
+    @Path("{id}")
+    @PUT
+    @Transactional
+    public Response updateUser(@PathParam("id") Long id, CreateUserRequest userData) {
+        User user = User.findById(id);
+
+        if (user != null) {
+            user.setName(userData.getName());
+            user.setAge(userData.getAge());
+            return Response.ok().build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
+    }
 }
