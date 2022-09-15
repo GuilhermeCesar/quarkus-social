@@ -4,6 +4,7 @@ import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import me.guilherme.quarkussocial.domain.User;
 import me.guilherme.quarkussocial.domain.repository.UserRepository;
 import me.guilherme.quarkussocial.rest.dto.CreateUserRequest;
+import me.guilherme.quarkussocial.rest.dto.ResponseError;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -24,7 +25,7 @@ public class UserResource {
 
 
     @Inject
-    public UserResource(UserRepository userRepository, Validator validator){
+    public UserResource(UserRepository userRepository, Validator validator) {
         this.userRepository = userRepository;
         this.validator = validator;
     }
@@ -34,12 +35,11 @@ public class UserResource {
     public Response createUser(CreateUserRequest userRequest) {
 
         Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(userRequest);
-        if (!violations.isEmpty()){
-            ConstraintViolation<CreateUserRequest> erro = violations.stream().findAny().get();
-            String erroMessage = erro.getMessage();
+        if (!violations.isEmpty()) {
+            ResponseError responseError = ResponseError.createFromValidation(violations);
             return Response
                     .status(400)
-                    .entity(erroMessage)
+                    .entity(responseError)
                     .build();
         }
 
