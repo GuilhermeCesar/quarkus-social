@@ -1,4 +1,4 @@
-package me.guilherme.quarkussocial.domain;
+package me.guilherme.quarkussocial.domain.model;
 
 import lombok.Data;
 

@@ -1,7 +1,7 @@
 package me.guilherme.quarkussocial.rest;
 
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
-import me.guilherme.quarkussocial.domain.User;
+import me.guilherme.quarkussocial.domain.model.User;
 import me.guilherme.quarkussocial.domain.repository.UserRepository;
 import me.guilherme.quarkussocial.rest.dto.CreateUserRequest;
 import me.guilherme.quarkussocial.rest.dto.ResponseError;
