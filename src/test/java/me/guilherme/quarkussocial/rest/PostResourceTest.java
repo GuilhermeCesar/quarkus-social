@@ -27,7 +27,7 @@ class PostResourceTest {
 
     @Transactional
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
         var user = new User();
         user.setAge(30);
         user.setName("Fulano");
@@ -39,7 +39,7 @@ class PostResourceTest {
 
     @Test
     @DisplayName("should create a post for a user")
-    void createPostTest(){
+    void createPostTest() {
         var postRequest = new CreatePostRequest();
         postRequest.setText("Some text");
 
@@ -51,7 +51,25 @@ class PostResourceTest {
                 .post()
                 .then()
                 .statusCode(201);
+    }
 
+
+    @Test
+    @DisplayName("should return 404 when trying  a post for an inexistent user ")
+    void postForAninexistentUserTest() {
+        var postRequest = new CreatePostRequest();
+        postRequest.setText("Some text");
+
+        var inexistUserId = 999;
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(postRequest)
+                .pathParams("userId", inexistUserId)
+                .when()
+                .post()
+                .then()
+                .statusCode(404);
     }
 
 }
