@@ -1,6 +1,7 @@
 package me.guilherme.quarkussocial.rest;
 
 import me.guilherme.quarkussocial.domain.model.Follower;
+import me.guilherme.quarkussocial.domain.model.User;
 import me.guilherme.quarkussocial.domain.repository.FollowerRepository;
 import me.guilherme.quarkussocial.domain.repository.UserRepository;
 import me.guilherme.quarkussocial.rest.dto.FollowerRequest;
@@ -22,11 +23,13 @@ public class FollowerResource {
 
     private FollowerRepository repository;
     private UserRepository userRepository;
+    private FollowerRepository followerRepository;
 
     @Inject
-    public FollowerResource(FollowerRepository repository, UserRepository userRepository) {
+    public FollowerResource(FollowerRepository repository, UserRepository userRepository, FollowerRepository followerRepository) {
         this.repository = repository;
         this.userRepository = userRepository;
+        this.followerRepository = followerRepository;
     }
 
     @Transactional
@@ -63,17 +66,43 @@ public class FollowerResource {
     }
 
     @GET
-    public Response listFollowers(@PathParam("userId") Long userId) {
+    public Response listFollowers(@PathParam("userId") Long userId,
+                                  @HeaderParam("followerId") Long followerId) {
         var user = userRepository.findById(userId);
 
         if (user == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return Response
+                    .status(Response.Status.NOT_FOUND)
+                    .entity("You can't see this posts")
+                    .build();
+        }
+
+        if(followerId==null){
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("I forgot the header followerId")
+                    .build();
         }
 
 
+        User follower = userRepository.findById(followerId);
+
+        if(follower==null){
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("Inexistent followerId")
+                    .build();
+        }
+
+        boolean follows = followerRepository.follows(follower, user);
+
+        if(!follows){
+            return Response
+                    .status(Response.Status.FORBIDDEN)
+                    .build();
+        }
+
         var list = repository.findByUser(userId);
-
-
 
         FollowersPerUserResponse responseObject = new FollowersPerUserResponse();
         responseObject.setFollowersCouunt(list.size());
@@ -87,6 +116,23 @@ public class FollowerResource {
 
         return Response
                 .ok(responseObject)
+                .build();
+    }
+
+
+    @Transactional
+    @DELETE
+    public Response unfollowUser(@PathParam("userId") Long userId, @QueryParam("followerId") Long followId) {
+        var user = userRepository.findById(userId);
+
+        if (user == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        repository.deleteByFollowerAndUser(followId, userId);
+
+        return Response
+                .status(Response.Status.NO_CONTENT)
                 .build();
     }
 }
